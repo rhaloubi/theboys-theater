@@ -1,4 +1,5 @@
 import {
+  clearProfileCookieOptions,
   clearSessionCookieOptions,
   deleteSession,
 } from "@/lib/auth/session";
@@ -15,6 +16,7 @@ export async function POST() {
 
     const response = jsonData({ success: true });
     response.cookies.set(clearSessionCookieOptions());
+    response.cookies.set(clearProfileCookieOptions());
     return response;
   });
 }

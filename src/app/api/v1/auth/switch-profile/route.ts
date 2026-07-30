@@ -1,7 +1,7 @@
 import { requireSession } from "@/lib/api/auth-middleware";
 import { withErrorHandling } from "@/lib/api/route-handler";
 import { jsonData } from "@/lib/api/response";
-import { clearUserFromSession } from "@/lib/auth/session";
+import { clearProfileCookieOptions, clearUserFromSession } from "@/lib/auth/session";
 
 export async function POST() {
   return withErrorHandling(async () => {
@@ -10,6 +10,8 @@ export async function POST() {
 
     await clearUserFromSession(session.token);
 
-    return jsonData({ success: true, needsUserSelection: true });
+    const response = jsonData({ success: true, needsUserSelection: true });
+    response.cookies.set(clearProfileCookieOptions());
+    return response;
   });
 }

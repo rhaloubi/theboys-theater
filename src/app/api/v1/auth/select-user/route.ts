@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { attachUserToSession } from "@/lib/auth/session";
+import {
+  attachUserToSession,
+  profileCookieOptions,
+} from "@/lib/auth/session";
 import { requireSession } from "@/lib/api/auth-middleware";
 import { withErrorHandling } from "@/lib/api/route-handler";
 import { jsonData, jsonError, parseJsonBody } from "@/lib/api/response";
@@ -33,7 +36,7 @@ export async function POST(request: Request) {
 
     await attachUserToSession(session.token, user._id.toString());
 
-    return jsonData({
+    const response = jsonData({
       user: {
         id: user._id.toString(),
         slug: user.slug,
@@ -41,6 +44,8 @@ export async function POST(request: Request) {
         avatarColor: user.avatarColor ?? "#e50914",
       },
     });
+    response.cookies.set(profileCookieOptions(user.slug));
+    return response;
   });
 }
 

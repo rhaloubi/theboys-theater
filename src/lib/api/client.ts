@@ -154,6 +154,11 @@ export const profilesApi = {
       method: "POST",
       body: JSON.stringify({ displayName }),
     }),
+  deleteMe: (code: string) =>
+    api<{ success: boolean; needsUserSelection: boolean }>("/users/me", {
+      method: "DELETE",
+      body: JSON.stringify({ code }),
+    }),
 };
 
 async function apiFormData<T>(path: string, formData: FormData): Promise<T> {

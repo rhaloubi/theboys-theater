@@ -1,10 +1,18 @@
 import { createHash, randomBytes } from "crypto";
 import { cookies } from "next/headers";
+import { SESSION_COOKIE } from "@/lib/auth/cookies";
 import { connectDB } from "@/lib/db/mongodb";
 import { Session, User, type IUser } from "@/lib/models";
 import type { SessionUser } from "@/lib/types";
 
-export const SESSION_COOKIE = "tbt_session";
+export { SESSION_COOKIE, PROFILE_COOKIE } from "@/lib/auth/cookies";
+export {
+  sessionCookieOptions,
+  clearSessionCookieOptions,
+  profileCookieOptions,
+  clearProfileCookieOptions,
+} from "@/lib/auth/cookies";
+
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export function hashToken(token: string): string {
@@ -28,6 +36,27 @@ export function verifyGateCode(code: string): boolean {
   }
 
   return process.env.NODE_ENV === "development" && code === "theboys";
+}
+
+export function hashDeleteProfileCode(code: string): string {
+  const secret = process.env.SESSION_SECRET ?? "dev-secret";
+  return createHash("sha256")
+    .update(`delete-profile:${code}:${secret}`)
+    .digest("hex");
+}
+
+export function verifyDeleteProfileCode(code: string): boolean {
+  const expected = process.env.DELETE_PROFILE_CODE_HASH;
+  if (expected) {
+    return hashDeleteProfileCode(code) === expected;
+  }
+
+  const plain = process.env.DELETE_PROFILE_CODE;
+  if (plain) {
+    return code === plain;
+  }
+
+  return process.env.NODE_ENV === "development" && code === "diabolical";
 }
 
 export function generateSessionToken(): string {
@@ -130,26 +159,3 @@ export async function getSessionUser(): Promise<{
   };
 }
 
-export function sessionCookieOptions(token: string) {
-  return {
-    name: SESSION_COOKIE,
-    value: token,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-    maxAge: SESSION_TTL_MS / 1000,
-  };
-}
-
-export function clearSessionCookieOptions() {
-  return {
-    name: SESSION_COOKIE,
-    value: "",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-    maxAge: 0,
-  };
-}

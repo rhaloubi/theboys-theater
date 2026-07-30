@@ -1,4 +1,5 @@
 import { Header } from "@/components/layout/header";
+import { ProfileDeleteSection } from "@/components/profile/profile-delete-section";
 import { ProfileImdbImport } from "@/components/profile/profile-imdb-import";
 
 export default function ProfilePage() {
@@ -11,6 +12,7 @@ export default function ProfilePage() {
           Import your IMDb data and manage your side of the comparison.
         </p>
         <ProfileImdbImport />
+        <ProfileDeleteSection />
       </main>
     </>
   );

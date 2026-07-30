@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { authApi } from "@/lib/api/client";
 
 const NAV = [
@@ -14,7 +14,6 @@ const NAV = [
 
 export function Header() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { data } = useQuery({
     queryKey: ["auth", "me"],
     queryFn: () => authApi.me(),
@@ -26,8 +25,6 @@ export function Header() {
   }
 
   async function switchProfile() {
-    await authApi.switchProfile();
-    void queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
     router.push("/gate/select-user?switch=1");
   }
 
