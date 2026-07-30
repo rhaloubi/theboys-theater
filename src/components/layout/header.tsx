@@ -9,6 +9,7 @@ const NAV = [
   { href: "/browse", label: "Browse" },
   { href: "/community", label: "Community" },
   { href: "/compare", label: "Compare" },
+  { href: "/profile", label: "Profile" },
 ];
 
 export function Header() {

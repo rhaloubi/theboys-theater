@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { AddToWatchlistButton } from "@/components/title/add-to-watchlist-button";
 import { Header } from "@/components/layout/header";
 import { tmdbApi } from "@/lib/api/client";
 import { backdropUrl, posterUrl, watchHref } from "@/lib/utils/images";
@@ -69,12 +70,20 @@ export default function MovieTitlePage() {
                 <p className="text-sm leading-relaxed md:text-base">
                   {movie.overview || "No overview available."}
                 </p>
-                <Link
-                  href={watchHref(movie.id, "movie")}
-                  className="inline-flex h-12 items-center justify-center rounded bg-primary px-8 font-semibold text-white transition-opacity hover:opacity-90"
-                >
-                  ▶ Play
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href={watchHref(movie.id, "movie")}
+                    className="inline-flex h-12 items-center justify-center rounded bg-primary px-8 font-semibold text-white transition-opacity hover:opacity-90"
+                  >
+                    ▶ Play
+                  </Link>
+                  <AddToWatchlistButton
+                    tmdbId={movie.id}
+                    mediaType="movie"
+                    title={movie.title}
+                    posterPath={movie.poster_path}
+                  />
+                </div>
               </div>
             </div>
           </div>

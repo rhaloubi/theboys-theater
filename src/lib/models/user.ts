@@ -19,8 +19,6 @@ const userSchema = new Schema(
   },
 );
 
-userSchema.index({ slug: 1 }, { unique: true });
-
 export type IUser = InferSchemaType<typeof userSchema> & {
   _id: mongoose.Types.ObjectId;
 };

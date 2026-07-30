@@ -16,7 +16,6 @@ const sessionSchema = new Schema(
   },
 );
 
-sessionSchema.index({ tokenHash: 1 }, { unique: true });
 sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export type ISession = InferSchemaType<typeof sessionSchema> & {

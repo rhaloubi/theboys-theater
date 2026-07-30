@@ -1,4 +1,13 @@
-import type { ApiErrorBody, AuthMeResponse, PopularRowItem } from "@/lib/types";
+import type {
+  ApiErrorBody,
+  AuthMeResponse,
+  HistoryResponse,
+  ImdbCompareResponse,
+  ImdbImportResult,
+  PopularRowItem,
+  WatchlistCompareResponse,
+  WatchlistItem,
+} from "@/lib/types";
 import type { TmdbSearchResult } from "@/lib/tmdb/types";
 
 export class ApiError extends Error {
@@ -94,6 +103,14 @@ export const tmdbApi = {
 };
 
 export const historyApi = {
+  list: (params?: { limit?: number; cursor?: string; userSlug?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.limit) q.set("limit", String(params.limit));
+    if (params?.cursor) q.set("cursor", params.cursor);
+    if (params?.userSlug) q.set("userSlug", params.userSlug);
+    const qs = q.toString();
+    return api<HistoryResponse>(`/history${qs ? `?${qs}` : ""}`);
+  },
   logWatch: (body: {
     tmdbId: number;
     mediaType: "movie" | "tv";
@@ -109,4 +126,64 @@ export const historyApi = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+};
+
+async function apiFormData<T>(path: string, formData: FormData): Promise<T> {
+  const res = await fetch(`/api/v1${path}`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    let message = res.statusText;
+    try {
+      const body = (await res.json()) as ApiErrorBody;
+      message = body.error ?? message;
+    } catch {
+      // ignore
+    }
+    throw new ApiError(res.status, message);
+  }
+
+  return res.json() as Promise<T>;
+}
+
+export const imdbApi = {
+  importCsv: (file: File) => {
+    const formData = new FormData();
+    formData.set("file", file);
+    return apiFormData<ImdbImportResult>("/imdb/import", formData);
+  },
+  ratings: (userSlug?: string) =>
+    api<{ ratings: import("@/lib/types").ImdbRatingItem[] }>(
+      `/imdb/ratings${userSlug ? `?userSlug=${encodeURIComponent(userSlug)}` : ""}`,
+    ),
+};
+
+export const compareApi = {
+  imdb: () => api<ImdbCompareResponse>("/imdb/compare"),
+  watchlist: () => api<WatchlistCompareResponse>("/watchlist/compare"),
+};
+
+export const watchlistApi = {
+  list: (userSlug?: string) =>
+    api<{ items: WatchlistItem[] }>(
+      `/watchlist${userSlug ? `?userSlug=${encodeURIComponent(userSlug)}` : ""}`,
+    ),
+  add: (body: {
+    tmdbId: number;
+    mediaType: "movie" | "tv";
+    title: string;
+    posterPath?: string | null;
+  }) =>
+    api<{ item: WatchlistItem }>("/watchlist", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  remove: (tmdbId: number, mediaType: "movie" | "tv") =>
+    api<{ success: boolean }>(
+      `/watchlist/${tmdbId}?mediaType=${mediaType}`,
+      { method: "DELETE" },
+    ),
 };
