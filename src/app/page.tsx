@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "@/lib/api/client";
 import { TbtMark } from "@/components/brand/tbt-logo";
 
@@ -88,6 +88,7 @@ function GateShell({
 
 export default function GatePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [code, setCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -115,17 +116,21 @@ export default function GatePage() {
 
     try {
       await authApi.verifyCode(code);
-      router.push("/gate/select-user");
+      await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+      router.refresh();
+      router.replace("/gate/select-user");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setShake(true);
       setTimeout(() => setShake(false), 200);
-    } finally {
       setLoading(false);
     }
   }
 
-  if (sessionLoading || session?.authenticated) {
+  const redirecting =
+    !sessionLoading && Boolean(session?.authenticated) && !session?.user;
+
+  if (sessionLoading || session?.user || redirecting) {
     return (
       <GateShell>
         <p className="text-muted text-sm drop-shadow-sm">Loading…</p>

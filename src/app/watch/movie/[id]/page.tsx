@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
+import { StreamPlayer } from "@/components/watch/stream-player";
 import { useLogWatch } from "@/hooks/use-log-watch";
 import { tmdbApi } from "@/lib/api/client";
 
@@ -44,11 +45,9 @@ export default function WatchMoviePage() {
             ← Back to {movie?.title ?? "movie"}
           </Link>
           {Number.isFinite(tmdbId) && (
-            <iframe
-              src={`https://player.videasy.to/movie/${tmdbId}`}
+            <StreamPlayer
+              target={{ tmdbId, mediaType: "movie" }}
               title={movie?.title ?? "Movie player"}
-              allowFullScreen
-              className="aspect-video w-full rounded-sm border-0 bg-black"
             />
           )}
         </div>

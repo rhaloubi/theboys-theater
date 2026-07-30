@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
+import { StreamPlayer } from "@/components/watch/stream-player";
 import { TvSeasonEpisodePicker } from "@/components/watch/tv-season-episode-picker";
 import { useLogWatch } from "@/hooks/use-log-watch";
 import { tmdbApi } from "@/lib/api/client";
@@ -56,11 +57,14 @@ export default function WatchTvPage() {
           />
 
           {Number.isFinite(tmdbId) && (
-            <iframe
-              src={`https://player.videasy.to/tv/${tmdbId}/${season}/${episode}`}
+            <StreamPlayer
+              target={{
+                tmdbId,
+                mediaType: "tv",
+                season,
+                episode,
+              }}
               title={`${show?.name ?? "TV"} S${season}E${episode}`}
-              allowFullScreen
-              className="aspect-video w-full rounded-sm border-0 bg-black"
             />
           )}
         </div>
