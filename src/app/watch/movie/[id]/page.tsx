@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
-import { historyApi, tmdbApi } from "@/lib/api/client";
+import { useLogWatch } from "@/hooks/use-log-watch";
+import { tmdbApi } from "@/lib/api/client";
 
 export default function WatchMoviePage() {
   const params = useParams<{ id: string }>();
@@ -19,16 +19,18 @@ export default function WatchMoviePage() {
 
   const movie = data?.movie;
 
-  useEffect(() => {
-    if (!movie) return;
-    void historyApi.logWatch({
-      tmdbId: movie.id,
-      mediaType: "movie",
-      title: movie.title,
-      posterPath: movie.poster_path,
-      backdropPath: movie.backdrop_path,
-    });
-  }, [movie]);
+  useLogWatch(
+    movie
+      ? {
+          tmdbId: movie.id,
+          mediaType: "movie",
+          title: movie.title,
+          posterPath: movie.poster_path,
+          backdropPath: movie.backdrop_path,
+        }
+      : null,
+    `movie-${tmdbId}`,
+  );
 
   return (
     <>

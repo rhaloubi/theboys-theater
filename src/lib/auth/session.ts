@@ -63,6 +63,16 @@ export async function attachUserToSession(
   );
 }
 
+export async function clearUserFromSession(token: string): Promise<void> {
+  await connectDB();
+  const tokenHash = hashToken(token);
+
+  await Session.findOneAndUpdate(
+    { tokenHash, expiresAt: { $gt: new Date() } },
+    { userId: null },
+  );
+}
+
 export async function deleteSession(token: string): Promise<void> {
   await connectDB();
   await Session.deleteOne({ tokenHash: hashToken(token) });

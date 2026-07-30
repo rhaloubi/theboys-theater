@@ -1,9 +1,16 @@
 import mongoose from "mongoose";
 import { requireSession } from "@/lib/api/auth-middleware";
-import { jsonData } from "@/lib/api/response";
+import { logWatchEvent } from "@/lib/api/history-log";
+import { jsonData, parseJsonBody } from "@/lib/api/response";
 import { connectDB } from "@/lib/db/mongodb";
 import { User, WatchEvent } from "@/lib/models";
 import type { HistoryItem } from "@/lib/types";
+
+export async function POST(request: Request) {
+  const body = await parseJsonBody<unknown>(request);
+  if (body instanceof Response) return body;
+  return logWatchEvent(body);
+}
 
 export async function GET(request: Request) {
   const session = await requireSession();

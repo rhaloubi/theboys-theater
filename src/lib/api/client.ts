@@ -65,7 +65,15 @@ export const authApi = {
         displayName: string;
         avatarColor: string;
       }>;
-    }>("/auth/select-user"),
+      totalProfiles: number;
+      maxProfiles: number;
+      canAddProfile: boolean;
+    }>("/users"),
+  switchProfile: () =>
+    api<{ success: boolean; needsUserSelection: boolean }>(
+      "/auth/switch-profile",
+      { method: "POST" },
+    ),
 };
 
 export const healthApi = {
@@ -125,6 +133,19 @@ export const historyApi = {
     api<{ id: string; watchedAt: string }>("/history", {
       method: "POST",
       body: JSON.stringify(body),
+    }),
+};
+
+export const profilesApi = {
+  list: () => authApi.listUsers(),
+  create: (displayName: string) =>
+    api<{
+      user: { slug: string; displayName: string; avatarColor: string };
+      totalProfiles: number;
+      maxProfiles: number;
+    }>("/users", {
+      method: "POST",
+      body: JSON.stringify({ displayName }),
     }),
 };
 

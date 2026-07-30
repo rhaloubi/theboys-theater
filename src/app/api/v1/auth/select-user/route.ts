@@ -46,7 +46,7 @@ export async function GET() {
   if (!session.ok) return session.response;
 
   await connectDB();
-  const users = await User.find().sort({ slug: 1 }).lean();
+  const users = await User.find().sort({ createdAt: 1 }).lean();
 
   return jsonData({
     users: users.map((u) => ({

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "@/lib/api/client";
 
 const NAV = [
@@ -14,6 +14,7 @@ const NAV = [
 
 export function Header() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data } = useQuery({
     queryKey: ["auth", "me"],
     queryFn: () => authApi.me(),
@@ -22,6 +23,12 @@ export function Header() {
   async function logout() {
     await authApi.logout();
     router.push("/");
+  }
+
+  async function switchProfile() {
+    await authApi.switchProfile();
+    void queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+    router.push("/gate/select-user?switch=1");
   }
 
   const user = data?.user;
@@ -49,15 +56,20 @@ export function Header() {
 
         {user && (
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={switchProfile}
+              className="flex items-center gap-2 rounded-lg px-2 py-1 transition-colors hover:bg-surface"
+              title="Switch profile"
+            >
               <span
-                className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold text-white"
                 style={{ backgroundColor: user.avatarColor }}
               >
                 {user.displayName.charAt(0).toUpperCase()}
               </span>
               <span className="hidden text-sm sm:inline">{user.displayName}</span>
-            </div>
+            </button>
             <button
               type="button"
               onClick={logout}
