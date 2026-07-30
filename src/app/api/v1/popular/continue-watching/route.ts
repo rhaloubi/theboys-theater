@@ -1,3 +1,3 @@
 import { createPopularHandler } from "@/lib/api/popular-handler";
 
-export const GET = createPopularHandler("most-watched");
+export const GET = createPopularHandler("continue-watching");

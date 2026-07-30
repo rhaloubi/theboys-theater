@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authApi } from "@/lib/api/client";
 
 export default function SelectUserPage() {
@@ -10,10 +10,25 @@ export default function SelectUserPage() {
   const [loadingSlug, setLoadingSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const { data: session, isLoading: sessionLoading } = useQuery({
+    queryKey: ["auth", "me"],
+    queryFn: () => authApi.me(),
+  });
+
   const { data, isLoading } = useQuery({
     queryKey: ["auth", "users"],
     queryFn: () => authApi.listUsers(),
+    enabled: Boolean(session?.authenticated),
   });
+
+  useEffect(() => {
+    if (sessionLoading) return;
+    if (!session?.authenticated) {
+      router.replace("/");
+    } else if (session.user) {
+      router.replace("/browse");
+    }
+  }, [session, sessionLoading, router]);
 
   async function selectUser(slug: string) {
     setLoadingSlug(slug);
@@ -26,6 +41,14 @@ export default function SelectUserPage() {
     } finally {
       setLoadingSlug(null);
     }
+  }
+
+  if (sessionLoading || !session?.authenticated || session.user) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-muted text-sm">Loading…</p>
+      </div>
+    );
   }
 
   return (

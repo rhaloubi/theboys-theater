@@ -1,4 +1,5 @@
-import type { ApiErrorBody, AuthMeResponse } from "@/lib/types";
+import type { ApiErrorBody, AuthMeResponse, PopularRowItem } from "@/lib/types";
+import type { TmdbSearchResult } from "@/lib/tmdb/types";
 
 export class ApiError extends Error {
   constructor(
@@ -61,4 +62,51 @@ export const authApi = {
 export const healthApi = {
   check: () =>
     api<{ ok: boolean; db: string; timestamp: string }>("/health"),
+};
+
+interface PopularResponse {
+  items: PopularRowItem[];
+  isFallback: boolean;
+}
+
+export const popularApi = {
+  mostWatched: () => api<PopularResponse>("/popular/most-watched"),
+  thisWeek: () => api<PopularResponse>("/popular/this-week"),
+  recent: () => api<PopularResponse>("/popular/recent"),
+  friendActivity: () => api<PopularResponse>("/popular/friend-activity"),
+  continueWatching: () => api<PopularResponse>("/popular/continue-watching"),
+};
+
+export const tmdbApi = {
+  search: (q: string, signal?: AbortSignal) =>
+    api<{
+      results: TmdbSearchResult[];
+      page: number;
+      totalPages: number;
+      totalResults: number;
+    }>(`/tmdb/search?q=${encodeURIComponent(q)}`, { signal }),
+  movie: (id: number) =>
+    api<{ movie: import("@/lib/tmdb/types").TmdbMovieDetail }>(
+      `/tmdb/movie/${id}`,
+    ),
+  tv: (id: number) =>
+    api<{ show: import("@/lib/tmdb/types").TmdbTvDetail }>(`/tmdb/tv/${id}`),
+};
+
+export const historyApi = {
+  logWatch: (body: {
+    tmdbId: number;
+    mediaType: "movie" | "tv";
+    title: string;
+    posterPath?: string | null;
+    backdropPath?: string | null;
+    seasonNumber?: number | null;
+    episodeNumber?: number | null;
+    episodeTitle?: string | null;
+    progressSeconds?: number;
+  }) =>
+    api<{ id: string; watchedAt: string }>("/history", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 };
