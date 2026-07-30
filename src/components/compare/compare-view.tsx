@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { compareApi } from "@/lib/api/client";
+import { getApiErrorMessage, shouldRetryQuery } from "@/lib/api/query-helpers";
 import { titleHref } from "@/lib/utils/images";
 import type { ImdbCompareResponse, WatchlistCompareResponse } from "@/lib/types";
 
@@ -16,18 +17,29 @@ export function CompareView() {
     queryKey: ["imdb", "compare"],
     queryFn: () => compareApi.imdb(),
     staleTime: 300_000,
+    retry: shouldRetryQuery,
   });
 
   const watchlistQuery = useQuery({
     queryKey: ["watchlist", "compare"],
     queryFn: () => compareApi.watchlist(),
     staleTime: 60_000,
+    retry: shouldRetryQuery,
   });
 
   const users = imdbQuery.data?.users ?? [];
+  const apiError = getApiErrorMessage([imdbQuery, watchlistQuery]);
 
   return (
     <div className="space-y-8">
+      {apiError && (
+        <div
+          className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-sm"
+          role="alert"
+        >
+          {apiError}
+        </div>
+      )}
       <div className="flex gap-2">
         {(["ratings", "watchlist"] as const).map((t) => (
           <button

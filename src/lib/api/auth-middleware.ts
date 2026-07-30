@@ -1,24 +1,32 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { jsonError } from "@/lib/api/response";
+import { handleRouteError } from "@/lib/api/route-handler";
 import type { SessionUser } from "@/lib/types";
 
 export async function requireSession(): Promise<
   | { ok: true; token: string; user: SessionUser | null; needsUserSelection: boolean }
   | { ok: false; response: NextResponse }
 > {
-  const session = await getSessionUser();
+  try {
+    const session = await getSessionUser();
 
-  if (!session.token) {
-    return { ok: false, response: jsonError("Unauthorized", 401, "UNAUTHORIZED") };
+    if (!session.token) {
+      return {
+        ok: false,
+        response: jsonError("Unauthorized", 401, "UNAUTHORIZED"),
+      };
+    }
+
+    return {
+      ok: true,
+      token: session.token,
+      user: session.user,
+      needsUserSelection: session.needsUserSelection,
+    };
+  } catch (err) {
+    return { ok: false, response: handleRouteError(err) };
   }
-
-  return {
-    ok: true,
-    token: session.token,
-    user: session.user,
-    needsUserSelection: session.needsUserSelection,
-  };
 }
 
 export async function requireUser(): Promise<

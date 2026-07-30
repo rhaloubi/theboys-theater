@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { watchlistApi } from "@/lib/api/client";
+import { useAuthUser } from "@/hooks/use-auth-user";
 
 interface AddToWatchlistButtonProps {
   tmdbId: number;
@@ -17,10 +18,13 @@ export function AddToWatchlistButton({
   posterPath,
 }: AddToWatchlistButtonProps) {
   const queryClient = useQueryClient();
+  const { data: session } = useAuthUser();
+  const hasUser = Boolean(session?.user);
 
   const { data } = useQuery({
     queryKey: ["watchlist", "mine"],
     queryFn: () => watchlistApi.list(),
+    enabled: hasUser,
   });
 
   const isOnList = data?.items.some(
@@ -41,6 +45,8 @@ export function AddToWatchlistButton({
       void queryClient.invalidateQueries({ queryKey: ["watchlist"] });
     },
   });
+
+  if (!hasUser) return null;
 
   const loading = addMutation.isPending || removeMutation.isPending;
 

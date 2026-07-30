@@ -95,19 +95,26 @@ export const popularApi = {
 };
 
 export const tmdbApi = {
-  search: (q: string, signal?: AbortSignal) =>
-    api<{
+  search: (q: string, type?: "movie" | "tv", signal?: AbortSignal) => {
+    const params = new URLSearchParams({ q });
+    if (type) params.set("type", type);
+    return api<{
       results: TmdbSearchResult[];
       page: number;
       totalPages: number;
       totalResults: number;
-    }>(`/tmdb/search?q=${encodeURIComponent(q)}`, { signal }),
+    }>(`/tmdb/search?${params.toString()}`, { signal });
+  },
   movie: (id: number) =>
     api<{ movie: import("@/lib/tmdb/types").TmdbMovieDetail }>(
       `/tmdb/movie/${id}`,
     ),
   tv: (id: number) =>
     api<{ show: import("@/lib/tmdb/types").TmdbTvDetail }>(`/tmdb/tv/${id}`),
+  tvSeason: (id: number, season: number) =>
+    api<{ season: import("@/lib/tmdb/types").TmdbTvSeason }>(
+      `/tmdb/tv/${id}/season/${season}`,
+    ),
 };
 
 export const historyApi = {

@@ -26,6 +26,7 @@ export interface TmdbPagedResults<T> {
   results: T[];
   page: number;
   total_pages: number;
+  total_results: number;
 }
 
 export interface TmdbMovieDetail {
@@ -71,6 +72,46 @@ export interface TmdbTvSeason {
     still_path: string | null;
     runtime: number | null;
   }>;
+}
+
+export type SearchMediaFilter = "movie" | "tv";
+
+export function mapMovieSearchResults(
+  data: TmdbPagedResults<{
+    id: number;
+    title: string;
+    poster_path?: string | null;
+    release_date?: string;
+    overview?: string;
+  }>,
+): TmdbSearchResult[] {
+  return data.results.map((item) => ({
+    tmdbId: item.id,
+    mediaType: "movie" as const,
+    title: item.title,
+    posterPath: item.poster_path ?? null,
+    releaseDate: item.release_date ?? null,
+    overview: item.overview ?? null,
+  }));
+}
+
+export function mapTvSearchResults(
+  data: TmdbPagedResults<{
+    id: number;
+    name: string;
+    poster_path?: string | null;
+    first_air_date?: string;
+    overview?: string;
+  }>,
+): TmdbSearchResult[] {
+  return data.results.map((item) => ({
+    tmdbId: item.id,
+    mediaType: "tv" as const,
+    title: item.name,
+    posterPath: item.poster_path ?? null,
+    releaseDate: item.first_air_date ?? null,
+    overview: item.overview ?? null,
+  }));
 }
 
 export function mapMultiSearchResults(

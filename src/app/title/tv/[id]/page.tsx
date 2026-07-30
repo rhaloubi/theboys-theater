@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { AddToWatchlistButton } from "@/components/title/add-to-watchlist-button";
+import { TvSeasonEpisodePicker } from "@/components/watch/tv-season-episode-picker";
 import { Header } from "@/components/layout/header";
 import { tmdbApi } from "@/lib/api/client";
 import { backdropUrl, posterUrl, watchHref } from "@/lib/utils/images";
@@ -76,12 +77,25 @@ export default function TvTitlePage() {
                   <p className="text-sm leading-relaxed md:text-base">
                     {show.overview || "No overview available."}
                   </p>
+                  <div className="flex flex-wrap items-end gap-4">
+                    <TvSeasonEpisodePicker
+                      tmdbId={show.id}
+                      season={seasons[0]?.season_number ?? 1}
+                      episode={1}
+                      compact
+                    />
+                  </div>
                   <div className="flex flex-wrap gap-3">
                     <Link
-                      href={watchHref(show.id, "tv", 1, 1)}
+                      href={watchHref(
+                        show.id,
+                        "tv",
+                        seasons[0]?.season_number ?? 1,
+                        1,
+                      )}
                       className="inline-flex h-12 items-center justify-center rounded bg-primary px-8 font-semibold text-white transition-opacity hover:opacity-90"
                     >
-                      ▶ Play S1E1
+                      ▶ Play
                     </Link>
                     <AddToWatchlistButton
                       tmdbId={show.id}

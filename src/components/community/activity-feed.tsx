@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { historyApi } from "@/lib/api/client";
+import { shouldRetryQuery } from "@/lib/api/query-helpers";
 import { posterUrl, watchHref } from "@/lib/utils/images";
 import {
   formatEpisodeLabel,
@@ -11,19 +12,31 @@ import {
 } from "@/lib/utils/time";
 
 export function ActivityFeed() {
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["history"],
       queryFn: ({ pageParam }) => historyApi.list({ cursor: pageParam }),
       initialPageParam: undefined as string | undefined,
       getNextPageParam: (last) => last.nextCursor ?? undefined,
       staleTime: 15_000,
+      retry: shouldRetryQuery,
     });
 
   const items = data?.pages.flatMap((p) => p.items) ?? [];
 
   if (isLoading) {
     return <p className="text-muted text-sm">Loading activity…</p>;
+  }
+
+  if (isError && error instanceof Error) {
+    return (
+      <div
+        className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-sm"
+        role="alert"
+      >
+        {error.message}
+      </div>
+    );
   }
 
   if (items.length === 0) {

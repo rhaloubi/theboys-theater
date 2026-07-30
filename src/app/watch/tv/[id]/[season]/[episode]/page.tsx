@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
+import { TvSeasonEpisodePicker } from "@/components/watch/tv-season-episode-picker";
 import { useLogWatch } from "@/hooks/use-log-watch";
 import { tmdbApi } from "@/lib/api/client";
 
@@ -47,9 +48,13 @@ export default function WatchTvPage() {
           >
             ← Back to {show?.name ?? "show"}
           </Link>
-          <p className="text-muted mb-2 text-sm">
-            Season {season} · Episode {episode}
-          </p>
+
+          <TvSeasonEpisodePicker
+            tmdbId={tmdbId}
+            season={season}
+            episode={episode}
+          />
+
           {Number.isFinite(tmdbId) && (
             <iframe
               src={`https://player.videasy.to/tv/${tmdbId}/${season}/${episode}`}

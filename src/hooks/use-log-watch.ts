@@ -22,6 +22,8 @@ export function useLogWatch(payload: WatchLogPayload | null, logKey: string) {
     if (!payload) return;
     if (loggedKeyRef.current === logKey) return;
     loggedKeyRef.current = logKey;
-    void historyApi.logWatch(payload);
+    void historyApi.logWatch(payload).catch(() => {
+      // Profile may not be selected yet — ignore silently
+    });
   }, [payload, logKey]);
 }

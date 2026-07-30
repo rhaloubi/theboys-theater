@@ -6,19 +6,27 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { tmdbApi } from "@/lib/api/client";
+import type { SearchMediaFilter } from "@/lib/tmdb/types";
 import { posterUrl, titleHref } from "@/lib/utils/images";
 import { SearchSkeleton } from "@/components/ui/skeleton";
 
+const CATEGORIES: { id: SearchMediaFilter; label: string }[] = [
+  { id: "tv", label: "Séries" },
+  { id: "movie", label: "Films" },
+];
+
 export function SearchBar() {
   const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<SearchMediaFilter>("tv");
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const debouncedQuery = useDebouncedValue(query, 300);
 
   const { data, isFetching, isError } = useQuery({
-    queryKey: ["tmdb", "search", debouncedQuery],
-    queryFn: ({ signal }) => tmdbApi.search(debouncedQuery, signal),
+    queryKey: ["tmdb", "search", debouncedQuery, category],
+    queryFn: ({ signal }) =>
+      tmdbApi.search(debouncedQuery, category, signal),
     enabled: debouncedQuery.length >= 2,
     staleTime: 120_000,
   });
@@ -28,7 +36,7 @@ export function SearchBar() {
 
   useEffect(() => {
     setActiveIndex(0);
-  }, [debouncedQuery, results.length]);
+  }, [debouncedQuery, category, results.length]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -65,9 +73,9 @@ export function SearchBar() {
   }
 
   return (
-    <div className="relative w-full max-w-xl">
+    <div className="relative w-full max-w-2xl">
       <div className="relative">
-        <span className="text-muted pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm">
+        <span className="text-muted pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-base">
           ⌕
         </span>
         <input
@@ -81,13 +89,30 @@ export function SearchBar() {
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           onKeyDown={handleKeyDown}
-          placeholder="Search movies & shows… (press /)"
-          className="h-11 w-full rounded border border-border bg-surface py-2 pr-4 pl-9 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+          placeholder="Search…"
+          className="h-12 w-full rounded-md border border-border/60 bg-surface/80 py-3 pr-4 pl-11 text-base outline-none transition-colors placeholder:text-muted focus:border-border focus:bg-surface"
         />
       </div>
 
+      <div className="mt-5 flex items-center justify-center gap-10">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.id}
+            type="button"
+            onClick={() => setCategory(cat.id)}
+            className={`text-base transition-colors ${
+              category === cat.id
+                ? "font-medium text-foreground"
+                : "text-muted hover:text-foreground/80"
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
       {showDropdown && (
-        <div className="absolute top-full z-50 mt-2 max-h-[60vh] w-full overflow-y-auto rounded-lg border border-border bg-surface-elevated shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
+        <div className="absolute top-full z-50 mt-3 max-h-[60vh] w-full overflow-y-auto rounded-lg border border-border bg-surface-elevated shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
           {isFetching && <SearchSkeleton />}
           {!isFetching && isError && (
             <p className="text-muted p-4 text-sm">Search failed. Try again.</p>
@@ -116,7 +141,7 @@ export function SearchBar() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{item.title}</p>
                   <p className="text-muted text-xs capitalize">
-                    {item.mediaType}
+                    {item.mediaType === "tv" ? "Série" : "Film"}
                     {item.releaseDate ? ` · ${item.releaseDate.slice(0, 4)}` : ""}
                   </p>
                 </div>
