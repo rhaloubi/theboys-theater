@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authApi } from "@/lib/api/client";
+import { TbtMark } from "@/components/brand/tbt-logo";
 
 const TAGLINE =
   process.env.NEXT_PUBLIC_GATE_TAGLINE ??
@@ -134,10 +135,8 @@ export default function GatePage() {
 
   return (
     <GateShell shake={shake}>
-      <div className="space-y-2">
-        <p className="text-primary text-sm font-semibold tracking-widest uppercase drop-shadow-sm">
-          The Boys Theater
-        </p>
+      <div className="flex flex-col items-center space-y-2">
+        <TbtMark size="lg" className="shadow-lg ring-white/20" />
         <h1 className="text-3xl font-bold tracking-tight drop-shadow-md sm:text-4xl">
           You shall not pass
         </h1>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { TbtLogo } from "@/components/brand/tbt-logo";
 import { authApi } from "@/lib/api/client";
 
 const NAV = [
@@ -34,9 +35,8 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-border/40 bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-[1920px] items-center justify-between px-4 md:px-12">
         <div className="flex items-center gap-8">
-          <Link href="/browse" className="text-lg font-bold tracking-tight">
-            <span className="text-primary">TBT</span>
-            <span className="hidden sm:inline"> The Boys Theater</span>
+          <Link href="/browse" className="text-lg">
+            <TbtLogo size="sm" />
           </Link>
           <nav className="hidden items-center gap-5 md:flex">
             {NAV.map((item) => (
